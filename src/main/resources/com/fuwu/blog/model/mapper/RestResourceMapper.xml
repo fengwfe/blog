@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.RestResourceMapper">
+	<sql id="rest_resources_allColumns">
+	   a11.id as a11_id,
+	   a11.uri as a11_uri,
+	   a11.httpMethod as a11_httpMethod,
+	   a11.description as a11_a11,
+	   a11.created as a11_created,
+	   a11.createdBy as a11_createdBy,
+	   a11.updated as a11_updated,
+	   a11.updatedBy as a11_updatedBy
+	</sql>
+	<select id="fetchById" resultType="com.fuwu.blog.dto.response.RestResourceDTO">
+		select a11.* from rest_resources a11 where a11.id=#{id}
+	</select>
+	
+	<select id="fetch" resultType="com.fuwu.blog.dto.response.RestResourceDTO">
+		select 
+			a11.* 
+		from 
+			rest_resources a11
+		where 1=1
+ 		<if test="uri!=null and uri!=''">
+  				and  a11.uri like concat('%',#{uri},'%')
+  		</if>
+  		<if test="httpMethod!=null and httpMethod!=''">
+  				and  a11.httpMethod like concat('%',#{httpMethod},'%')
+  		</if>
+  		<if test="description!=null and description!=''">
+  				and  a11.description like concat('%',#{description},'%')
+  		</if>
+  		
+	</select>	
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into rest_resources (uri,httpMethod,description,createdBy,updatedBy) 
+		 values(#{uri},#{httpMethod},#{description},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update rest_resources 
+		set uri=#{uri},
+			httpMethod=#{httpMethod},
+			description=#{description},
+			updatedBy=#{updatedBy}
+		where id=#{id}		
+	</update>
+	<delete id="deleteById">
+		delete from rest_resources where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from rest_resources where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+</mapper>

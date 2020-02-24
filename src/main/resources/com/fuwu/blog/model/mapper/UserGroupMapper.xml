@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.UserGroupMapper">
+	<sql id="user_groups_allColumns">
+	   a8.id as a8_id,
+	   a8.name as a8_name,
+	   a8.description as a8_description,
+	   a8.created as a8_created,
+	   a8.createdBy as a8_createdBy,
+	   a8.updated as a8_updated,
+	   a8.updatedBy as a8_updatedBy
+	</sql>
+	<select id="fetchById" resultType="com.fuwu.blog.dto.response.UserGroupDTO">
+		select a8.* from user_groups a8 where a8.id=#{id}
+	</select>
+	
+	<select id="fetch" resultType="com.fuwu.blog.dto.response.UserGroupDTO">
+		select 
+			a8.* 
+		from 
+			user_groups a8
+		where 1=1
+  		<if test="name!=null and name!=''">
+  				and  a8.name like concat('%',#{name},'%')
+  		</if>
+	</select>
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into user_groups (name,description,createdBy,updatedBy) 
+		 values(#{name},#{description},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update user_groups 
+		set name=#{name},
+			description=#{description},
+			updatedBy=#{updatedBy}
+		where id=#{id}		
+	</update>
+	<delete id="deleteById">
+		delete from user_groups where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from user_groups where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+	
+	<insert id="addUserToUserGroup" useGeneratedKeys="true" keyProperty="id">
+		 insert into user_group_user (userId,userGroupId,createdBy,updatedBy) 
+		 values(#{userId},#{userGroupId},#{createdBy},#{updatedBy})
+	</insert>
+	<delete id="removeUserFromUserGroup">
+		delete from user_group_user where userId=#{userId} and userGroupId=#{userGroupId}
+	</delete>
+</mapper>

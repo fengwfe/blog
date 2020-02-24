@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.TagMapper">
+	<sql id="tags_allColumns">
+	   a3.id as a3_id,
+	   a3.name as a3_name,
+	   a3.authorId as a3_authorId,
+	   a3.created as a3_created,
+	   a3.createdBy as a3_createdBy,
+	   a3.updated as a3_updated,
+	   a3.updatedBy as a3_updatedBy
+	</sql>
+	<select id="fetchById" resultType="com.fuwu.blog.dto.response.TagDTO">
+		select a3.* from tags a3 where a3.id=#{id}
+	</select>
+	
+	<select id="fetch" resultType="com.fuwu.blog.dto.response.TagDTO">
+		select 
+			a3.* 
+		from 
+			tags a3
+		where 1=1
+		<if test="authorId!=null">
+  				and a3.authorId=#{authorId}
+  		</if>
+	</select>
+	<select id="fetchTagsByArticleId" resultType="com.fuwu.blog.dto.response.TagDTO">
+		select 
+			a3.* 
+		from 
+			article_tag a5 join tags a3 on a5.tagId=a3.id
+		where 
+			a5.articleId=#{id}
+	</select>
+	<select id="fetchTagsByAuthorId" resultType="com.fuwu.blog.dto.response.TagDTO">
+		select 
+			a3.* 
+		from  
+			tags a3
+		where 
+			a3.authorId=#{id}
+	</select>	
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into tags (name,authorId,createdBy,updatedBy) 
+		 values(#{name},#{authorId},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update tags 
+		set name=#{name},
+			updatedBy=#{updatedBy}
+		where id=#{id}		
+	</update>
+	<delete id="deleteById">
+		delete from tags where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from tags where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+</mapper>

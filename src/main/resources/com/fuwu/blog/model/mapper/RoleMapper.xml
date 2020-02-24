@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.RoleMapper">
+	<sql id="roles_allColumns">
+	   a9.id as a9_id,
+	   a9.name as a9_name,
+	   a9.description as a9_description,
+	   a9.created as a9_created,
+	   a9.createdBy as a9_createdBy,
+	   a9.updated as a9_updated,
+	   a9.updatedBy as a9_updatedBy
+	</sql>
+	<resultMap type="com.fuwu.blog.dto.response.RoleDTO" id="role_map">
+		<id property="id" column="a9_id"/>
+		<result property="name" column="a9_name"/>
+		<result property="description" column="a9_description"/>
+		<result property="created" column="a9_created"/>
+		<result property="createdBy" column="a9_createdBy"/>
+		<result property="updated" column="a9_updated"/>
+		<result property="updatedBy" column="a9_updatedBy"/>
+		<collection property="privileges" column="a9_id" select="com.fuwu.blog.model.mapper.PrivilegeMapper.fetchByRoleIdNonPagination"/>
+	</resultMap>
+	<select id="fetchById" resultMap="role_map">
+		select
+			<include refid="roles_allColumns"/>
+		from 
+			roles a9 
+		where 
+			a9.id=#{id}
+	</select>
+	
+	<select id="fetch" resultMap="role_map">
+		select 
+			<include refid="roles_allColumns"/> 
+		from 
+			roles a9
+		where 1=1
+  		<if test="name!=null and name!=''">
+  				and  a9.name like concat('%',#{name},'%')
+  		</if>
+	</select>	
+	<select id="fetchByUserId" resultType="com.fuwu.blog.dto.response.RoleDTO">
+		select a9.* from roles a9 join user_role a15  on a9.id = a15.roleId where a15.userId=#{userId}
+	</select>
+	<select id="fetchByUserIdNonPagination" resultMap="role_map">
+		select
+			<include refid="roles_allColumns"/>  
+		from 
+			roles a9 
+		join 
+			user_role a15  on a9.id = a15.roleId 
+		where 
+			a15.userId=#{userId}
+	</select>
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into roles (name,description,createdBy,updatedBy) 
+		 values(#{name},#{description},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update roles 
+		set name=#{name},
+			description=#{description},
+			updatedBy=#{updatedBy}
+		where id=#{id}		
+	</update>
+	<delete id="deleteById">
+		delete from roles where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from roles where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+	<insert id="addRoleToUser" useGeneratedKeys="true" keyProperty="id">
+		 insert into user_role (userId,roleId,createdBy,updatedBy) 
+		 values(#{userId},#{roleId},#{createdBy},#{updatedBy})
+	</insert>
+	<delete id="removeRoleFromUser">
+		delete from user_role where userId=#{userId} and roleId=#{roleId}
+	</delete>
+</mapper>

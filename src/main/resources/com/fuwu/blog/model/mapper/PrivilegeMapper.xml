@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.PrivilegeMapper">
+	<sql id="privileges_allColumns">
+	   a10.id as a10_id,
+	   a10.code as a10_code,
+	   a10.description as a10_description,
+	   a10.created as a10_created,
+	   a10.createdBy as a10_createdBy,
+	   a10.updated as a10_updated,
+	   a10.updatedBy as a10_updatedBy
+	</sql>
+	<select id="fetchById" resultType="com.fuwu.blog.dto.response.PrivilegeDTO">
+		select a10.* from privileges a10 where a10.id=#{id}
+	</select>
+	
+	<select id="fetch" resultType="com.fuwu.blog.dto.response.PrivilegeDTO">
+		select 
+			a10.* 
+		from 
+			privileges a10
+		where 1=1
+ 		<if test="code!=null and code!=''">
+  				and  a10.code like concat('%',#{code},'%')
+  		</if>
+	</select>
+	<select id="fetchByRestResourceId" resultType="com.fuwu.blog.dto.response.PrivilegeDTO">
+		select a10.* from privileges a10 join rest_resource_privilege a16 on a10.id=a16.privilegeId where a16.restResourceId=#{id}
+	</select>
+	<select id="fetchByRoleId" resultType="com.fuwu.blog.dto.response.PrivilegeDTO">
+		select a10.* from privileges a10 join role_privilege a17 on a10.id=a17.privilegeId where a17.roleId=#{id}
+	</select>	
+	<select id="fetchByRoleIdNonPagination" resultType="com.fuwu.blog.dto.response.PrivilegeDTO">
+		select a10.* from privileges a10 join role_privilege a17 on a10.id=a17.privilegeId where a17.roleId=#{id}
+	</select>	
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into privileges (code,description,createdBy,updatedBy) 
+		 values(#{code},#{description},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update privileges 
+		set code=#{code},
+			description=#{description},
+			updatedBy=#{updatedBy}
+		where id=#{id}		
+	</update>
+	<delete id="deleteById">
+		delete from privileges where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from privileges where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+	<insert id="addPrivilegeToRole" useGeneratedKeys="true" keyProperty="id">
+		 insert into role_privilege (privilegeId,roleId,createdBy,updatedBy) 
+		 values(#{privilegeId},#{roleId},#{createdBy},#{updatedBy})
+	</insert>
+	<insert id="addPrivilegeToRestResource" useGeneratedKeys="true" keyProperty="id">
+		 insert into rest_resource_privilege (privilegeId,restResourceId,createdBy,updatedBy) 
+		 values(#{privilegeId},#{restResourceId},#{createdBy},#{updatedBy})
+	</insert>
+	<delete id="removePrivilegeFromRole">
+		delete from role_privilege where privilegeId=#{privilegeId} and roleId=#{roleId}
+	</delete>
+	<delete id="removePrivilegeFromRestResource">
+		delete from rest_resource_privilege where privilegeId=#{privilegeId} and restResourceId=#{restResourceId}
+	</delete>
+</mapper>

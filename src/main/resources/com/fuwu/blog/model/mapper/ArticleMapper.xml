@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.ArticleMapper">
+	<sql id="articles_allColumns">
+	   a1.id as a1_id,
+	   a1.title as a1_title,
+	   a1.content as a1_content,
+	   a1.authorId as a1_authorId,
+	   a1.status as a1_status,
+	   a1.created as a1_created,
+	   a1.createdBy as a1_createdBy,
+	   a1.updated as a1_updated,
+	   a1.updatedBy as a1_updatedBy
+	</sql>
+	<resultMap type="com.fuwu.blog.dto.response.ArticleDTO" id="article_map">
+		<id property="id" column="a1_id"/>
+		<result property="title" column="a1_title"/>
+		<result property="content" column="a1_content"/>
+		<result property="status" column="a1_status"/>
+		<result property="created" column="a1_created"/>
+		<result property="createdBy" column="a1_createdBy"/>
+		<result property="updated" column="a1_updated"/>
+		<result property="updatedBy" column="a1_updatedBy"/>
+		<association property="author" javaType="com.fuwu.blog.dto.response.UserDTO" >
+			<id property="id" column="a2_id"/>
+			<result property="loginName" column="a2_loginName"/>
+			<result property="nickname" column="a2_nickname"/>
+			<result property="email" column="a2_email"/>
+			<result property="avatar" column="a2_avatar"/>
+			<result property="created" column="a2_created"/>
+			<result property="createdBy" column="a2_createdBy"/>
+			<result property="updated" column="a2_updated"/>
+			<result property="updatedBy" column="a2_updatedBy"/>
+		</association>
+		<collection property="tags" column="a1_id" select="com.fuwu.blog.model.mapper.TagMapper.fetchTagsByArticleId"/>
+	</resultMap>
+	<select id="fetchById" resultMap="article_map">
+		select 
+			<include refid="articles_allColumns"></include>,
+			<include refid="com.fuwu.blog.model.mapper.UserMapper.users_allColumns"></include>		
+			from articles a1 
+				join users a2 on a1.authorId=a2.id
+			where a1.id=#{id}
+	</select>
+	<select id="fetch" resultMap="article_map">
+		select 
+		<include refid="articles_allColumns"></include>,
+		<include refid="com.fuwu.blog.model.mapper.UserMapper.users_allColumns"></include>		
+		from articles a1 
+			join users a2 on a1.authorId=a2.id
+		where 1=1	
+		<if test="authorId!=null">
+  				and a.authorId=#{authorId}
+  		</if>
+  		<if test="categoryId!=null">
+  				and a.categoryId=#{categoryId}
+  		</if>
+  		<if test="status!=null">
+  				and a.status=#{status}
+  		</if>
+  		<if test="createdStart!=null">
+  				and a.created &gt;=#{createdStart}
+  		</if>
+  		<if test="createdEnd!=null">
+  				and a.created &lt;=#{createdEnd}
+  		</if>
+  		<if test="updatedStart!=null">
+  				and a.updated &gt;=#{updatedStart}
+  		</if>
+  		<if test="updatedEnd!=null">
+  				and a.updated &lt;=#{updatedEnd}
+  		</if>
+	</select>
+	<select id="fetchArticlesByCategoryId" resultMap="article_map">
+		select 
+			<include refid="articles_allColumns"></include>,
+			<include refid="com.fuwu.blog.model.mapper.UserMapper.users_allColumns"></include>		
+			from articles a1 
+				join users a2 on a1.authorId=a2.id
+			where a1.categoryId=#{id}
+	</select>
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into articles (title,content,authorId,categoryId,status,createdBy,updatedBy) 
+		 values(#{title},#{content},#{authorId},#{categoryId},#{status},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update articles 
+		set title=#{title},
+			content=#{content},
+			status=#{status},
+			updatedBy=#{updatedBy}
+		where id=#{id}		
+	</update>
+	<delete id="deleteById">
+		delete from articles where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from articles where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+	
+	
+</mapper>

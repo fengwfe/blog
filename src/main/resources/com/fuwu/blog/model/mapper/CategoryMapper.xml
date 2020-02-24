@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.CategoryMapper">
+	<sql id="categories_allColumns">
+	   a6.id as a6_id,
+	   a6.name as a6_name,
+	   a6.authorId as a6_authorId,
+	   a6.parentId as a6_parentId,
+	   a6.created as a6_created,
+	   a6.createdBy as a6_createdBy,
+	   a6.updated as a6_updated,
+	   a6.updatedBy as a6_updatedBy
+	</sql>
+	<resultMap type="com.fuwu.blog.dto.response.CategoryDTO" id="category_map">
+		<id property="id" column="a6_id"/>
+		<result property="name" column="a6_name"/>
+		<result property="authorId" column="a6_authorId"/>
+		<result property="parentId" column="a6_parentId"/>
+		<result property="created" column="a6_created"/>
+		<result property="createdBy" column="a6_createdBy"/>
+		<result property="updated" column="a6_updated"/>
+		<result property="updatedBy" column="a6_updatedBy"/>
+		<collection property="children" column="a6_parentId" select="fetchCategoriesByParentId" />
+	</resultMap>
+	<select id="fetchById" resultMap="category_map">
+		select 
+			<include refid="categories_allColumns"/>
+		from 
+			categories a6 
+		where 
+			a6.id=#{id}
+	</select>
+	<select id="fetch" resultMap="category_map">
+		select 
+			<include refid="categories_allColumns"/>
+		from 
+			categories a6 
+		where 
+			1=1
+		<if test="authorId!=null">
+  				and a6.authorId=#{authorId}
+  		</if>
+  		<if test="parentId!=null">
+  				and a6.parentId=#{parentId}
+  		</if>
+  		<if test="name!=null and name!=''">
+  				and a6.name like concat('%',#{name},'%')
+  		</if>
+	</select>
+	<select id="fetchCategoriesByParentId" resultType="com.fuwu.blog.dto.response.CategoryDTO">
+		select * from categories where parentId=#{parentId}
+	</select>
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into categories (name,authorId,parentId,createdBy,updatedBy) 
+		 values(#{name},#{authorId},#{parentId},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update categories 
+		set name=#{name},
+			parentId=#{parentId}
+		where id=#{id}		
+	</update>
+	<delete id="deleteById">
+		delete from categories where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from categories where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+	
+	
+</mapper>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fuwu.blog.model.mapper.UserMapper">
+	<sql id="users_allColumns">
+	   a2.id as a2_id,
+	   a2.loginName as a2_loginName,
+	   a2.loginPwd as a2_loginPwd,
+	   a2.nickname as a2_nickname,
+	   a2.email as a2_email,
+	   a2.avatar as a2_avatar,
+	   a2.created as a2_created,
+	   a2.createdBy as a2_createdBy,
+	   a2.updated as a2_updated,
+	   a2.updatedBy as a2_updatedBy
+	</sql>
+	<resultMap type="com.fuwu.blog.dto.response.UserDTO" id="user_map">
+		<id property="id" column="a2_id"/>
+		<result property="loginName" column="a2_loginName"/>
+		<result property="nickname" column="a2_nickname"/>
+		<result property="email" column="a2_email"/>
+		<result property="avatar" column="a2_avatar"/>
+		<result property="created" column="a2_created"/>
+		<result property="createdBy" column="a2_createdBy"/>
+		<result property="updated" column="a2_updated"/>
+		<result property="updatedBy" column="a2_updatedBy"/>
+		<collection property="roles" column="a2_id" select="com.fuwu.blog.model.mapper.RoleMapper.fetchByUserIdNonPagination"/>
+	</resultMap>
+	<select id="fetchById" resultMap="user_map">
+		select 
+			<include refid="users_allColumns"/>
+		from 
+			users a2 
+		where 
+			a2.id=#{id}
+	</select>
+	<select id="fetchByLoginName" resultType="com.fuwu.blog.model.entity.User">
+		select 
+			a2.*
+	    from 
+	    	users a2
+	    where 
+	    	a2.loginName=#{loginName}
+	</select>
+	
+	<select id="fetchByGroupId" resultMap="user_map">
+		select
+			<include refid="users_allColumns"/>
+		from 
+			users a2 
+		join 
+			user_group_user a13  on a2.id=a13.userId 
+		where 
+			a13.userGroupId=#{userGroupId}
+	</select>
+	<select id="fetchByDepartmentId" resultMap="user_map">
+		select 
+			<include refid="users_allColumns"/>
+		from 
+			users a2 
+		join 
+			department_user a14  on a2.id=a14.userId 
+		where 
+			a14.departmentId=#{departmentId}
+	</select>
+	<select id="fetch" resultMap="user_map">
+		select
+	    	<include refid="users_allColumns"/>
+	    from 
+	    	users a2 
+	    where 1=1	
+		<if test="loginName!=null and loginName!=''">
+  				and  a2.loginName like concat('%',#{loginName},'%')
+  		</if>
+  		<if test="nickname!=null and nickname!=''">
+  				and  a2.nickname like concat('%',#{nickname},'%')
+  		</if>
+  		<if test="email!=null and email!=''">
+  				and  a2.email like concat('%',#{email},'%')
+  		</if>
+	</select>
+	<insert id="create" useGeneratedKeys="true" keyProperty="id">
+		 insert into users (loginName,loginPwd,email,createdBy,updatedBy) 
+		 values(#{loginName},#{loginPwd},#{email},#{createdBy},#{updatedBy})
+	</insert>
+	<update id="update">
+		update users 
+		set nickname=#{nickname},
+			email=#{email},
+			avatar=#{avatar}
+		where id=#{id}		
+	</update>
+	<update id="resetPwd">
+		update users 
+		set loginPwd=#{loginPwd}
+		where id=#{id}		
+	</update>
+	
+	<delete id="deleteById">
+		delete from users where id=#{id}
+	</delete>
+	<delete id="batchDeleteByIds">
+		delete from users where id in
+		<foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+		  #{id}
+		</foreach>
+	</delete>
+	
+	
+</mapper>
