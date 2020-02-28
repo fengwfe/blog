@@ -2,8 +2,10 @@ package com.fuwu.blog.service.impl;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
+import com.fuwu.blog.constant.CacheConstant;
 import com.fuwu.blog.dto.param.CreateRestResourceDTO;
 import com.fuwu.blog.dto.param.FetchRestResourceDTO;
 import com.fuwu.blog.dto.param.UpdateRestResourceDTO;
@@ -21,6 +23,8 @@ public class RestResourceServiceImpl extends BaseCRUDServiceImpl<RestResource,Cr
 	@Autowired
 	PrivilegeMapper privilegeMapper;
 	
+	
+	@CacheEvict(cacheNames = CacheConstant.CACHE_NAME_RESOURCE_PRIVILEGE_MAP,allEntries = true)
 	@Override
 	public RestResourceDTO addPrivilegeToRestResource(Integer privilegeId, Integer restResourceId) {
 		RestResourcePrivilege resourcePrivilege=new RestResourcePrivilege();
@@ -32,6 +36,7 @@ public class RestResourceServiceImpl extends BaseCRUDServiceImpl<RestResource,Cr
 		return mapper.fetchById(restResourceId);
 	}
 
+	@CacheEvict(cacheNames = CacheConstant.CACHE_NAME_RESOURCE_PRIVILEGE_MAP,allEntries = true)
 	@Override
 	public RestResourceDTO removePrivilegeFromRestResource(Integer privilegeId, Integer restResourceId) {
 		RestResourcePrivilege resourcePrivilege=new RestResourcePrivilege();

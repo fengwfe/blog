@@ -2,16 +2,15 @@ package com.fuwu.blog.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.fuwu.blog.constant.CacheConstant;
 import com.fuwu.blog.dto.param.CreatePrivilegeDTO;
 import com.fuwu.blog.dto.param.FetchByIdDTO;
 import com.fuwu.blog.dto.param.FetchPrivilegeDTO;
@@ -30,6 +29,8 @@ public class PrivilegeServiceImpl extends BaseCRUDServiceImpl<Privilege,CreatePr
 	@Autowired
 	RestResourceMapper restResourceMapper;
 	
+	
+	@Cacheable(cacheNames = CacheConstant.CACHE_NAME_RESOURCE_PRIVILEGE_MAP)
 	@Override
 	public Map<RestResourceDTO, List<String>> fetchResourcePrivilegeMap() {
 		Map<RestResourceDTO, List<String>> map=new HashMap<>();
@@ -54,28 +55,6 @@ public class PrivilegeServiceImpl extends BaseCRUDServiceImpl<Privilege,CreatePr
 		}
 		return map;
 	}
-
-	@Override
-	public List<String> fetchRequiredPrivilegeCodes(HttpServletRequest request) {
-		//TODO cache ResourcePrivilegeMap 
-		Map<RestResourceDTO, List<String>> map=fetchResourcePrivilegeMap();
-		if(null!=map) {
-			Iterator<RestResourceDTO> keys=map.keySet().iterator();
-			while(keys.hasNext()) {
-				RestResourceDTO key=keys.next();
-				String uri=key.getUri();
-				String httpMethod=key.getHttpMethod();
-				AntPathRequestMatcher matcher=new AntPathRequestMatcher(uri,httpMethod);
-				if(matcher.matches(request)) {
-					List<String> codes= map.get(key);
-					return codes;
-					
-				}
-			}
-		}
-		return null;
-	}
-
 	@Override
 	public List<PrivilegeDTO> fetchByRoleId(FetchByIdDTO roleId) {
 		return mapper.fetchByRoleId(roleId);
